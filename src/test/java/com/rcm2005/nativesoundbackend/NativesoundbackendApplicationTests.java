@@ -1,4 +1,4 @@
-package com.rafael.nativesoundbackend;
+package com.rcm2005.nativesoundbackend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
