@@ -26,15 +26,56 @@ import java.util.List;
  *     - en-US
  *     - es
  */
-
 @ConfigurationProperties(prefix = "tts")
-@Validated  //ativa a validação automatica do jakarta validation
+@Validated  // Ativa validação automática (Jakarta Validation)
 public record TtsConfigProperties(
-        @NotBlank(message = "Provider deve ser especificado (Ex: openai, azure, local)")
+
+        @NotBlank(message = "Provider deve ser especificado (ex: openai, azure, local)")
         String provider,
 
-        @NotBlank(message = "Base do URL do TTS provider é obrigatória")
-        String baseUrl, //camelCase padrão Spring (base-url no yml vira baseURL
+        @NotBlank(message = "Base URL do TTS provider é obrigatória")
+        String baseUrl,  // camelCase padrão Spring (base-url no yml vira baseUrl)
 
+        @NotNull
+        Duration connectTimeout,  // Use Duration pra timeouts (mais type-safe que int ms)
 
-)
+        @NotNull
+        Duration readTimeout,
+
+        @Min(value = 100, message = "max-text-chars deve ser pelo menos 100")
+        @Max(value = 10000, message = "max-text-chars não deve exceder 10000")
+        int maxTextChars,
+
+        List<@NotBlank String> allowedLangs,
+
+        String apiKey  // Pode ser null se for local sem key
+
+) {
+
+        /**
+         * Retorna o limite máximo de caracteres, com fallback seguro.
+         */
+        public int safeMaxTextChars() {
+                return maxTextChars > 0 ? maxTextChars : 5000;
+        }
+
+        /**
+         * Verifica se um idioma é permitido (case-insensitive).
+         */
+        public boolean isLanguageAllowed(String lang) {
+                if (lang == null || allowedLangs == null || allowedLangs.isEmpty()) {
+                        return true; // Se não configurado, aceita tudo (pra dev)
+                }
+                return allowedLangs.stream()
+                        .anyMatch(allowed -> allowed.equalsIgnoreCase(lang));
+        }
+
+        // Se quiser timeouts em ms (pra compatibilidade com RestClient/WebClient)
+        public int connectTimeoutMs() {
+                return (int) connectTimeout.toMillis();
+        }
+
+        public int readTimeoutMs() {
+                return (int) readTimeout.toMillis();
+        }
+}

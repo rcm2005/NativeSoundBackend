@@ -13,7 +13,7 @@ public class TtsProviderClient {
 
     public TtsProviderClient(TtsConfigProperties config) {
         this.restClient = RestClient.builder()
-                .baseUrl(config.getTtsProviderUrl())  // ex: "http://localhost:8000" ou "https://seu-tts-python"
+                .baseUrl(config.baseUrl())  // ex: "http://localhost:8000" ou "https://seu-tts-python"
                 .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader("Accept", MediaType.APPLICATION_OCTET_STREAM_VALUE) // pro áudio binário
                 .build();
